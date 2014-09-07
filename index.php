@@ -1,6 +1,16 @@
 <?php
+	$salt = (isset($_REQUEST['salt']))?$_REQUEST['salt']:substr(md5(microtime()),0,5);
+
+	if(!isset($_REQUEST['player'])) {
+		$_REQUEST['player'] = 1;
+	}
+
+	if(!isset($_REQUEST['salt'])) {
+		header('Location: ?salt='.$salt.'&player='.$_REQUEST['player']);
+	}
+
 	require_once('connectfour.php');
-	$game = new ConnectFour();
+	$game = new ConnectFour($salt);
 ?>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script>
 <style>
@@ -45,6 +55,7 @@ table {
 <h4>Text-Mode Connect4</h4>
 <p><small>Just click on a column to drop a coin.</small></p>
 <h5 class="player<?php echo $_REQUEST['player']; ?>">You are Player <?php echo $_REQUEST['player']; ?></h5>
+
 <table>
 	<tr>
 		<?php foreach($game->getBoard() as $id => $column): ?>
@@ -65,7 +76,10 @@ table {
 </table>
 
 <h6 id="yourturn"><?php echo ($_REQUEST['player']==$game->getNextPlayer())?'Your turn':'Waiting for partner...'; ?></h6>
-
+<?php if($_REQUEST['player']==1): ?>
+<h6>Send this URL to Player2 to join your game</h6>
+<h6><small><?php echo $_SERVER['SERVER_NAME'] . '/?salt='.$salt.'&player=2'; ?></small></h6>
+<?php endif; ?>
 <?php if (!$game->checkWinner()): ?>
 	
 <script type="text/javascript">
